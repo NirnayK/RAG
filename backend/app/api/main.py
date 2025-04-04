@@ -1,3 +1,4 @@
 from fastapi import APIRouter
 
-api_router = APIRouter()
+public_router = APIRouter()
+secure_router = APIRouter()
