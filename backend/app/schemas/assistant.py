@@ -1,22 +1,25 @@
-from pydantic import BaseModel
 from datetime import datetime
-from typing import Optional
-import uuid
+from typing import List, Optional
+from uuid import UUID
+
+from pydantic import BaseModel
 
 
 class AssistantBase(BaseModel):
     name: str
-    llm_model_id: str
-    knowledge_base_id: list
+    llm_id: UUID
+    knowledge_base_ids: List[UUID]
 
 
 class AssistantOut(AssistantBase):
-    id: uuid.UUID
+    id: UUID
     created_at: datetime
     updated_at: datetime
-
-    class Config:
-        from_attributes = True
+    llm_settings: "LLMSettings"
+    retrieval_settings: "RetrievalSettings"
+    memory_settings: "MemorySettings"
+    prompt_settings: "PromptSettings"
+    assistant_settings: "AssistantSettings"
 
 
 class LLMSettings(BaseModel):
@@ -65,10 +68,11 @@ class AssistantCreate(AssistantBase):
 
 class AssistantUpdate(BaseModel):
     name: Optional[str] = None
-    llm_model_id: Optional[str] = None
-    knowledge_base_id: Optional[list] = None
+    llm_id: Optional[UUID] = None
+    knowledge_base_ids: Optional[List[UUID]] = None
     llm_settings: Optional[LLMSettings] = None
     retrieval_settings: Optional[RetrievalSettings] = None
     prompt_settings: Optional[PromptSettings] = None
     assistant_settings: Optional[AssistantSettings] = None
+    memory_settings: Optional[MemorySettings] = None
     memory_settings: Optional[MemorySettings] = None

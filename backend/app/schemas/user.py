@@ -1,30 +1,32 @@
-from datetime import datetime
-from pydantic import BaseModel, EmailStr
-from typing import Optional
 import uuid
+from datetime import datetime
+from typing import Annotated, Optional
+
+from helpers import validate_email_username, validate_password_strength
+from pydantic import BaseModel, EmailStr
+from pydantic.functional_validators import AfterValidator
+
+# Define Annotated type aliases with validators
+ValidEmail = Annotated[EmailStr, AfterValidator(validate_email_username)]
+StrongPassword = Annotated[str, AfterValidator(validate_password_strength)]
 
 
 class UserBase(BaseModel):
     first_name: str
     last_name: str
-    email: EmailStr
+    email: ValidEmail
 
 
 class UserCreate(UserBase):
-    password: str
+    password: StrongPassword
 
 
 class UserUpdate(BaseModel):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
-    email: Optional[EmailStr] = None
-    password: Optional[str] = None
 
 
 class UserOut(UserBase):
     id: uuid.UUID
     created_at: datetime
     updated_at: datetime
-
-    class Config:
-        orm_mode = True

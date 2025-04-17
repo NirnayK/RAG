@@ -1,5 +1,6 @@
 from typing import Optional
 from uuid import UUID
+
 from pydantic import BaseModel
 
 
@@ -10,4 +11,5 @@ class Chunk(BaseModel):
     keywords: Optional[list[str]] = None
     vector: Optional[list[float]] = None
     metadata: Optional[dict] = None
+    status: Optional[bool] = True
     status: Optional[bool] = True

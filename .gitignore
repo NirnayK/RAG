@@ -1,2 +1,3 @@
 venv
-.vs-code
+.vscode
+*.code-workspace

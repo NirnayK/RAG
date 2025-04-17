@@ -1,5 +1,7 @@
 from fastapi import APIRouter
+from backend.app.models import User
 from schemas.user import UserCreate, UserOut, UserUpdate
+from validators.user import UserValidator
 
 router = APIRouter(prefix="/user", tags=["user"])
 
@@ -9,8 +11,7 @@ async def create_user(user: UserCreate):
     """
     Create a new user.
     """
-    # Logic to create a user in the database
-    pass
+    
 
 
 @router.get("/{user_id}", )

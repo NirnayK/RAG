@@ -1,7 +1,8 @@
-from pydantic import BaseModel
+import uuid
 from datetime import datetime
 from typing import Optional
-import uuid
+
+from pydantic import BaseModel
 
 
 class DocumentBase(BaseModel):
@@ -20,6 +21,4 @@ class DocumentOut(DocumentBase):
     id: uuid.UUID
     created_at: datetime
     updated_at: datetime
-
-    class Config:
-        from_attributes = True
+    updated_at: datetime

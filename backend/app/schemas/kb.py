@@ -1,7 +1,8 @@
-from pydantic import BaseModel
+import uuid
 from datetime import datetime
 from typing import Optional
-import uuid
+
+from pydantic import BaseModel
 
 
 class KbBase(BaseModel):
@@ -16,9 +17,6 @@ class KbOut(KbBase):
     id: uuid.UUID
     created_at: datetime
     updated_at: datetime
-
-    class Config:
-        from_attributes = True
 
 
 class KbCreate(KbBase):
