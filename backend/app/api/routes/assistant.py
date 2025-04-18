@@ -1,12 +1,15 @@
-from fastapi import APIRouter
-from schemas.assistant import AssistantCreate, AssistantOut, AssistantUpdate
 from typing import List
+from fastapi import APIRouter, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from core.db import get_db
+from schemas.assistant import AssistantCreate, AssistantOut, AssistantUpdate
 
 router = APIRouter(prefix="/assistant", tags=["assistant"])
 
 
 @router.post("/create", response_model=AssistantOut)
-async def create_assistant(assistant: AssistantCreate):
+async def create_assistant(assistant: AssistantCreate, db: AsyncSession = Depends(get_db)):
     """
     Create a new assistant.
     """
@@ -15,7 +18,7 @@ async def create_assistant(assistant: AssistantCreate):
 
 
 @router.get("/{assistant_id}", response_model=AssistantOut)
-async def get_assistant(assistant_id: str):
+async def get_assistant(assistant_id: str, db: AsyncSession = Depends(get_db)):
     """
     Get assistant details by assistant ID.
     """
@@ -24,7 +27,7 @@ async def get_assistant(assistant_id: str):
 
 
 @router.put("/{assistant_id}", response_model=AssistantOut)
-async def update_assistant(assistant_id: str, assistant: AssistantUpdate):
+async def update_assistant(assistant_id: str, assistant: AssistantUpdate, db: AsyncSession = Depends(get_db)):
     """
     Update assistant details.
     """
@@ -33,7 +36,7 @@ async def update_assistant(assistant_id: str, assistant: AssistantUpdate):
 
 
 @router.delete("/{assistant_id}")
-async def delete_assistant(assistant_id: str):
+async def delete_assistant(assistant_id: str, db: AsyncSession = Depends(get_db)):
     """
     Delete an assistant by assistant ID.
     """
@@ -42,7 +45,7 @@ async def delete_assistant(assistant_id: str):
 
 
 @router.get("/list", response_model=List[AssistantOut])
-async def list_assistants():
+async def list_assistants(db: AsyncSession = Depends(get_db)):
     """
     List all assistants.
     """

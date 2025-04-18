@@ -6,9 +6,31 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "asyncpg>=0.30.0",
+    "bcrypt>=4.3.0",
     "fastapi[standard]>=0.115.12",
+    "loguru>=0.7.3",
     "openai>=1.70.0",
     "pydantic-settings>=2.8.1",
     "pyjwt>=2.10.1",
     "sqlalchemy[asyncio]>=2.0.40",
 ]
+
+
+[tool.black]
+line-length = 115
+ensure_newline_before_comments = true
+
+[tool.isort]
+profile = "black"
+
+# 1. Specify the order of import sections:
+sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+default_section = "THIRDPARTY"
+
+# 2. Tell isort which modules are first‑party:
+known_first_party = ["core", "models", "schemas", "validators"]
+
+# 3. (Optional) Auto‑comment headings for visual clarity:
+import_heading_stdlib = "Standard Library"
+import_heading_thirdparty = "Third‑Party Libraries"
+import_heading_firstparty = "Local Application Imports"

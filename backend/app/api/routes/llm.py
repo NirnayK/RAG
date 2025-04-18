@@ -1,11 +1,14 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from core.db import get_db
 from schemas.llm import LLMBase
 
 router = APIRouter(prefix="/llm", tags=["llm"])
 
 
 @router.post("/create")
-async def create_llm(llm: LLMBase):
+async def create_llm(llm: LLMBase, db: AsyncSession = Depends(get_db)):
     """
     Create a new LLM.
     """
@@ -14,7 +17,7 @@ async def create_llm(llm: LLMBase):
 
 
 @router.get("/{llm_id}")
-async def get_llm(llm_id: str):
+async def get_llm(llm_id: str, db: AsyncSession = Depends(get_db)):
     """
     Get LLM details by LLM ID.
     """
@@ -23,7 +26,7 @@ async def get_llm(llm_id: str):
 
 
 @router.put("/{llm_id}")
-async def update_llm(llm_id: str, llm: LLMBase):
+async def update_llm(llm_id: str, llm: LLMBase, db: AsyncSession = Depends(get_db)):
     """
     Update LLM details.
     """
@@ -32,7 +35,7 @@ async def update_llm(llm_id: str, llm: LLMBase):
 
 
 @router.delete("/{llm_id}")
-async def delete_llm(llm_id: str):
+async def delete_llm(llm_id: str, db: AsyncSession = Depends(get_db)):
     """
     Delete an LLM by LLM ID.
     """
@@ -41,7 +44,7 @@ async def delete_llm(llm_id: str):
 
 
 @router.get("/list")
-async def list_llms():
+async def list_llms(db: AsyncSession = Depends(get_db)):
     """
     List all LLMs.
     """

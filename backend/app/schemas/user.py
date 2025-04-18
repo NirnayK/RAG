@@ -1,8 +1,15 @@
+# Standard Library
 import uuid
 from datetime import datetime
-from typing import Annotated, Optional
+from typing import Annotated
 
-from helpers import validate_email_username, validate_password_strength
+# Third‑Party Libraries
+from helpers import (
+    ValidEmptyString,
+    ValidString,
+    validate_email_username,
+    validate_password_strength,
+)
 from pydantic import BaseModel, EmailStr
 from pydantic.functional_validators import AfterValidator
 
@@ -12,8 +19,8 @@ StrongPassword = Annotated[str, AfterValidator(validate_password_strength)]
 
 
 class UserBase(BaseModel):
-    first_name: str
-    last_name: str
+    first_name: ValidString
+    last_name: ValidString
     email: ValidEmail
 
 
@@ -22,8 +29,8 @@ class UserCreate(UserBase):
 
 
 class UserUpdate(BaseModel):
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
+    first_name: ValidEmptyString
+    last_name: ValidEmptyString
 
 
 class UserOut(UserBase):

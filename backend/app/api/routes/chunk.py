@@ -1,12 +1,15 @@
 from typing import List
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from core.db import get_db
 from schemas.chunk import Chunk
 
 router = APIRouter(prefix="/kb/{kb_id}/document/{document_id}/chunk", tags=["chunk"])
 
 
 @router.post("/create", response_model=Chunk)
-async def create_chunk():
+async def create_chunk(data: Chunk, db: AsyncSession = Depends(get_db)):
     """
     Create a new chunk.
     """
@@ -15,7 +18,7 @@ async def create_chunk():
 
 
 @router.get("/{chunk_id}", response_model=Chunk)
-async def get_chunk(chunk_id: str):
+async def get_chunk(chunk_id: str, db: AsyncSession = Depends(get_db)):
     """
     Get chunk details by chunk ID.
     """
@@ -24,7 +27,7 @@ async def get_chunk(chunk_id: str):
 
 
 @router.put("/{chunk_id}", response_model=Chunk)
-async def update_chunk(chunk_id: str, chunk: Chunk):
+async def update_chunk(chunk_id: str, chunk: Chunk, db: AsyncSession = Depends(get_db)):
     """
     Update chunk details.
     """
@@ -33,7 +36,7 @@ async def update_chunk(chunk_id: str, chunk: Chunk):
 
 
 @router.delete("/{chunk_id}")
-async def delete_chunk(chunk_id: str):
+async def delete_chunk(chunk_id: str, db: AsyncSession = Depends(get_db)):
     """
     Delete a chunk by chunk ID.
     """
@@ -42,7 +45,7 @@ async def delete_chunk(chunk_id: str):
 
 
 @router.put("/action/{chunk_id}", response_model=Chunk)
-async def action_chunk(chunk_id: str, action: str):
+async def action_chunk(chunk_id: str, action: str, db: AsyncSession = Depends(get_db)):
     """
     Perform an action on a chunk.
     """
@@ -51,7 +54,7 @@ async def action_chunk(chunk_id: str, action: str):
 
 
 @router.get("/list", response_model=List[Chunk])
-async def list_chunks():
+async def list_chunks(db: AsyncSession = Depends(get_db)):
     """
     List all chunks.
     """
@@ -60,7 +63,7 @@ async def list_chunks():
 
 
 @router.get("/search", response_model=List[Chunk])
-async def search_chunks(query: str):
+async def search_chunks(query: str, db: AsyncSession = Depends(get_db)):
     """
     Search for chunks based on a query.
     """

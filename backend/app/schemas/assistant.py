@@ -1,7 +1,9 @@
+# Standard Library
 from datetime import datetime
 from typing import List, Optional
 from uuid import UUID
 
+# Third‑Party Libraries
 from pydantic import BaseModel
 
 
@@ -75,4 +77,5 @@ class AssistantUpdate(BaseModel):
     prompt_settings: Optional[PromptSettings] = None
     assistant_settings: Optional[AssistantSettings] = None
     memory_settings: Optional[MemorySettings] = None
+    assistant_settings: Optional[AssistantSettings] = None
     memory_settings: Optional[MemorySettings] = None

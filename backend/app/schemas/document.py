@@ -1,7 +1,9 @@
+# Standard Library
 import uuid
 from datetime import datetime
 from typing import Optional
 
+# Third‑Party Libraries
 from pydantic import BaseModel
 
 
@@ -20,5 +22,4 @@ class DocumentUpdate(DocumentBase):
 class DocumentOut(DocumentBase):
     id: uuid.UUID
     created_at: datetime
-    updated_at: datetime
     updated_at: datetime

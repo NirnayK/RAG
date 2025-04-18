@@ -1,4 +1,3 @@
-from ctypes import Array
 import uuid
 from datetime import datetime, timezone
 
@@ -38,7 +37,7 @@ class User(Base, DbBaseModel):
     first_name = Column(String(255), nullable=False)
     last_name = Column(String(255), nullable=False)
     email = Column(String(255), unique=True, nullable=False)
-    password = Column(String, nullable=False)
+    password = Column(String(128), nullable=False)
 
 
 class LLMs(Base, DbBaseModel):
@@ -73,7 +72,7 @@ class Document(Base, DbBaseModel):
     knowledge_base_id = Column(UUID(as_uuid=True), ForeignKey("knowledge_bases.id"), nullable=False)
 
     name = Column(String(255), nullable=False)
-    status = Column(String(64), nullable=False, default="pending")
+    status = Column(String(32), nullable=False, default="pending")
     progress = Column(SmallInteger, nullable=False, default=0)
     location = Column(String(4096), nullable=False)
 
@@ -100,7 +99,7 @@ class RetrievalSettings(Base, DbBaseModel):
 
     top_k = Column(Integer, nullable=False, default=5)
     similarity_threshold = Column(Float, nullable=False, default=0.7)
-    similarity_index = Column(String(50), nullable=False, default="cosine")
+    similarity_index = Column(String(16), nullable=False, default="cosine")
     rerank_model_id = Column(UUID(as_uuid=True), ForeignKey("llms.id"), nullable=True)
 
     assistant = relationship("Assistant", back_populates="retrieval_settings", uselist=False)
@@ -119,8 +118,8 @@ class AssistantSettings(Base, DbBaseModel):
     __tablename__ = "assistant_settings"
 
     keyword_generation = Column(Boolean, nullable=False, default=False)
-    empty_response = Column(String, nullable=False, default="")
-    greeting_message = Column(String, nullable=False, default="")
+    empty_response = Column(String(256), nullable=False, default="")
+    greeting_message = Column(String(1024), nullable=False, default="")
 
     assistant = relationship("Assistant", back_populates="assistant_settings", uselist=False)
 

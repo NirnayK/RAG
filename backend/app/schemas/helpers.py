@@ -1,4 +1,12 @@
+# Standard Library
 import re
+from typing import Annotated
+
+# Third‑Party Libraries
+from pydantic import Field
+
+ValidString = Annotated[str, Field(..., min_length=1, max_length=255)]
+ValidEmptyString = Annotated[str, Field(None, min_length=0, max_length=255)]
 
 
 def validate_email_username(value: str) -> str:
@@ -40,5 +48,8 @@ def validate_password_strength(value: str) -> str:
 
     if not re.search(r'[!@#$%^&*(),.?":{}|<>]', value):
         raise ValueError("Password must contain at least one special character")
+
+    if len(value) > 32:
+        raise ValueError("Password must not exceed 32 characters")
 
     return value
