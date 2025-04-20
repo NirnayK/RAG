@@ -1,16 +1,14 @@
-# Standard Library
 import uuid
 from datetime import datetime
 from typing import Annotated
 
-# Third‑Party Libraries
 from helpers import (
     ValidEmptyString,
     ValidString,
     validate_email_username,
     validate_password_strength,
 )
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr
 from pydantic.functional_validators import AfterValidator
 
 # Define Annotated type aliases with validators
@@ -34,6 +32,7 @@ class UserUpdate(BaseModel):
 
 
 class UserOut(UserBase):
+    model_config = ConfigDict(from_attributes=True)
     id: uuid.UUID
     created_at: datetime
     updated_at: datetime

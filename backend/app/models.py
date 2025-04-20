@@ -14,8 +14,10 @@ from sqlalchemy import (
     String,
 )
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
+
 
 Base = declarative_base()
 
@@ -29,6 +31,11 @@ class DbBaseModel:
         onupdate=datetime.now(timezone.utc),
     )
     deleted_at = Column(DateTime, nullable=True)
+
+    def mark_deleted(self, db_session: AsyncSession):
+        self.deleted_at = datetime.now(timezone.utc)
+        db_session.add(self)
+        db_session.commit()
 
 
 class User(Base, DbBaseModel):
@@ -47,6 +54,10 @@ class LLMs(Base, DbBaseModel):
     provider = Column(String(255), nullable=False, index=True)
     model_name = Column(String(255), nullable=False)
     api_base = Column(String(255), nullable=True)
+
+
+class ParserConfig(Base, DbBaseModel):
+    __tablename__ = "parser_configs"
 
 
 class KnowledgeBase(Base, DbBaseModel):

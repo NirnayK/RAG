@@ -1,13 +1,15 @@
 import asyncio
 from abc import ABC
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+from typing import Any, Callable, Dict, Generic, List, Optional, Set, Tuple, TypeVar
 
 from pydantic import BaseModel
-from sqlalchemy import select
+from sqlalchemy import Exists, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+T = TypeVar("T", bound=BaseModel)
 
-class BaseValidator(ABC):
+
+class BaseValidator(Generic[T], ABC):
     """
     Base class for validators.
     """
@@ -15,28 +17,36 @@ class BaseValidator(ABC):
     class Config:
         model_class = None  # Set by subclasses
 
-    def __init__(self, db: AsyncSession, data: BaseModel, user_id: str = ""):
+    def __init__(self, db: AsyncSession, data: T, user_id: str = ""):
         self.data = data
         self.db = db
         self.user_id = user_id
         self.errors = []  # Store validation errors as a list of strings
 
-    def validate_exist(self, model: Any, pk: str):
+    def validate_exist(self, model: Any, pk: str) -> Exists:
         return select(model).filter(model.id == pk).exists()
 
-    def validate_is_owner(self, model: Any, pk: str):
+    def validate_is_owner(self, model: Any, pk: str) -> Exists:
         return select(model).filter(model.id == pk, model.user_id == self.user_id).exists()
 
-    def validate_is_unique(self, model: Any, col: str, value: Any):
+    def validate_is_unique(self, model: Any, col: str, value: Any) -> Exists:
         return select(model).filter(getattr(model, col) == value).exists()
 
-    async def validate_queries(self, db_queries: List, apis: List[Callable]):
+    def get_validator_function(self, method_name: str) -> Callable:
+        if method_name == "save":
+            return self.save_validate
+        elif method_name == "update":
+            return self.update_validate
+        else:
+            return self.validate
+
+    async def validate_queries(self, db_queries: List, apis: List[Callable] = None) -> List:
         tasks = [self.db.execute(query) for query in db_queries]
         tasks += [api() for api in apis]
         results = await asyncio.gather(*tasks)
         return results
 
-    async def validate(self) -> Tuple[bool, Dict[str, List[str]]]:
+    async def validate(self, queries: Optional[List] = None) -> Tuple[bool, Dict[str, List[str]]]:
         """
         Validate the data and return a tuple of (is_valid, errors).
         This is a base implementation that returns valid with no errors.
@@ -49,7 +59,36 @@ class BaseValidator(ABC):
         """
         return True, {}
 
-    async def is_valid(self) -> bool:
+    async def save_validate(self) -> Tuple[bool, Dict[str, List[str]]]:
+        """
+        Validate the data for saving.
+        This is a base implementation that returns valid with no errors.
+        Subclasses should override this but can call super().save_validate()
+
+        Returns:
+            Tuple[bool, Dict[str, List[str]]]: A tuple containing:
+                - is_valid: True if validation passed, False otherwise
+                - errors: A dictionary of field names and their error messages
+        """
+        return await self.validate()
+
+    async def update_validate(self) -> Tuple[bool, Dict[str, List[str]]]:
+        """
+        Validate the data for updating.
+        This is a base implementation that returns valid with no errors.
+        Subclasses should override this but can call super().update_validate()
+
+        Returns:
+            Tuple[bool, Dict[str, List[str]]]: A tuple containing:
+                - is_valid: True if validation passed, False otherwise
+                - errors: A dictionary of field names and their error messages
+        """
+        return await self.validate()
+
+    async def is_valid(
+        self,
+        method: str = "default",
+    ) -> bool:
         """
         Check if the data is valid.
 
@@ -59,7 +98,7 @@ class BaseValidator(ABC):
         Side effects:
             Populates self.errors list when validation fails
         """
-        is_valid, error_dict = await self.validate()
+        is_valid, error_dict = await self.get_validator_function(method)()
         if not is_valid:
             # Convert error dictionary to a list of error messages
             for field, messages in error_dict.items():
@@ -151,4 +190,5 @@ class BaseValidator(ABC):
                     setattr(db_obj, field, data[field])
 
         await self.db.commit()
+        return db_obj
         return db_obj

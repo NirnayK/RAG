@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     DB_HOST: str = "localhost"
     DB_PORT: int = 5432
     DB_DATABASE: str = "postgres"
+    ORIGIN: str = "http://localhost:3000"
+    SECRET_KEY: str = "your_secret_key"
 
 
 settings = Settings()

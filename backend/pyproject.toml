@@ -10,6 +10,7 @@ dependencies = [
     "fastapi[standard]>=0.115.12",
     "loguru>=0.7.3",
     "openai>=1.70.0",
+    "passlib[bcrypt]>=1.7.4",
     "pydantic-settings>=2.8.1",
     "pyjwt>=2.10.1",
     "sqlalchemy[asyncio]>=2.0.40",
@@ -28,9 +29,4 @@ sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
 default_section = "THIRDPARTY"
 
 # 2. Tell isort which modules are first‑party:
-known_first_party = ["core", "models", "schemas", "validators"]
-
-# 3. (Optional) Auto‑comment headings for visual clarity:
-import_heading_stdlib = "Standard Library"
-import_heading_thirdparty = "Third‑Party Libraries"
-import_heading_firstparty = "Local Application Imports"
+known_first_party = ["core", "models", "schemas", "validators", "adapters", "services", "constants", "api", "routers"]

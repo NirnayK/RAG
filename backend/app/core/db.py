@@ -29,4 +29,7 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
     Dependency that yields an AsyncSession and ensures it closes after use.
     """
     async with AsyncSessionLocal() as session:
-        yield session
+        try:
+            yield session
+        finally:
+            await session.close()
