@@ -1,5 +1,3 @@
-from datetime import timedelta
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import select
@@ -30,7 +28,7 @@ async def login_for_access_token(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    access_token = create_access_token(data={"user_id": str(user.id)})
+    access_token = create_access_token(data={"sub": str(user.id)})
     return BaseResponse.ok(
         data=Token(access_token=access_token, token_type="bearer"),
         message="Login successful",

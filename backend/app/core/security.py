@@ -35,7 +35,7 @@ async def get_current_user_id(token: str = Depends(oauth2_scheme)) -> str:
     )
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-        user_id: str = payload.get("user_id")
+        user_id: str = payload.get("sub")
         if user_id is None:
             raise credentials_exception
     except InvalidTokenError:

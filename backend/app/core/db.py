@@ -5,6 +5,7 @@ from typing import AsyncGenerator
 from config import settings
 from sqlalchemy import URL
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
 
 url_ojbect = URL.create(
     drivername=settings.DB_DRIVER,  # asyncpg
@@ -20,6 +21,8 @@ async_engine = create_async_engine(
     echo_pool=True,
 )
 
+# instrument SQLAlchemy
+SQLAlchemyInstrumentor().instrument(engine=async_engine.sync_engine)
 
 AsyncSessionLocal = async_sessionmaker(bind=async_engine, class_=AsyncSession, expire_on_commit=False)
 
