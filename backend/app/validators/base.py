@@ -191,4 +191,3 @@ class BaseValidator(Generic[T], ABC):
 
         await self.db.commit()
         return db_obj
-        return db_obj

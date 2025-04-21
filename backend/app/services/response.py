@@ -1,5 +1,5 @@
 import os
-from typing import Any, Optional, Type, TypeVar
+from typing import Any, Dict, Optional, Type, TypeVar
 
 from fastapi import HTTPException, status
 from fastapi.responses import FileResponse, JSONResponse
@@ -7,6 +7,16 @@ from pydantic import BaseModel
 
 ModelType = TypeVar("ModelType", bound=BaseModel)
 
+DEFAULT_HEADERS = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Credentials": "true",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Expose-Headers": "Content-Disposition",
+    "Access-Control-Max-Age": "86400",
+    "Access-Control-Request-Method": "GET, POST, PUT, DELETE, OPTIONS",
+    "Access-Control-Request-Headers": "Content-Type, Authorization",
+}
 
 class BaseResponse:
     def __init__(
@@ -22,7 +32,7 @@ class BaseResponse:
             self.model = model
         # if a Pydantic model is provided, serialize ORM objects/lists automatically
         if self.model and data is not None:
-            self.data = self._serialize(data, model)
+            self.data = self._serialize(data, self.model)
         else:
             self.data = data
 
@@ -46,9 +56,13 @@ class BaseResponse:
         data: Any = None,
         message: str = "Success",
         model: Type[ModelType] | None = None,
+        additional_headers: Dict[str, str] | None = None,
     ) -> JSONResponse:
         inst = cls(message, data, None, model)
-        return JSONResponse(status_code=status.HTTP_200_OK, content=inst.dict())
+        headers = DEFAULT_HEADERS.copy()
+        if additional_headers:
+            headers.update(additional_headers)
+        return JSONResponse(status_code=status.HTTP_200_OK, content=inst.dict(), headers=headers)
 
     @classmethod
     def created(

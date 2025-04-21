@@ -18,7 +18,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
-
 Base = declarative_base()
 
 
@@ -32,10 +31,10 @@ class DbBaseModel:
     )
     deleted_at = Column(DateTime, nullable=True)
 
-    def mark_deleted(self, db_session: AsyncSession):
+    async def mark_deleted(self, db_session: AsyncSession):
         self.deleted_at = datetime.now(timezone.utc)
         db_session.add(self)
-        db_session.commit()
+        await db_session.commit()
 
 
 class User(Base, DbBaseModel):
