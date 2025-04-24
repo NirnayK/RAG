@@ -87,61 +87,6 @@ class Document(Base, DbBaseModel):
     parser_config = Column(JSON, nullable=False)
 
 
-class LLMSettings(Base, DbBaseModel):
-    __tablename__ = "llm_settings"
-
-    temperature = Column(Float, nullable=False, default=0.7)
-    top_p = Column(Float, nullable=False, default=1.0)
-    max_tokens = Column(Integer, nullable=False, default=150)
-    frequency_penalty = Column(Float, nullable=False, default=0.0)
-    presence_penalty = Column(Float, nullable=False, default=0.0)
-    tools = Column(ARRAY, nullable=True)
-
-    assistant = relationship("Assistant", back_populates="llm_settings", uselist=False)
-
-
-class RetrievalSettings(Base, DbBaseModel):
-    __tablename__ = "retrieval_settings"
-
-    top_k = Column(Integer, nullable=False, default=5)
-    similarity_threshold = Column(Float, nullable=False, default=0.7)
-    similarity_index = Column(String(16), nullable=False, default="cosine")
-    rerank_model_id = Column(UUID(as_uuid=True), ForeignKey("llms.id"), nullable=True)
-
-    assistant = relationship("Assistant", back_populates="retrieval_settings", uselist=False)
-
-
-class PromptSettings(Base, DbBaseModel):
-    __tablename__ = "prompt_settings"
-
-    system_prompt = Column(String, nullable=True, default="")
-    variables = Column(ARRAY, nullable=True)
-
-    assistant = relationship("Assistant", back_populates="prompt_settings", uselist=False)
-
-
-class AssistantSettings(Base, DbBaseModel):
-    __tablename__ = "assistant_settings"
-
-    keyword_generation = Column(Boolean, nullable=False, default=False)
-    empty_response = Column(String(256), nullable=False, default="")
-    greeting_message = Column(String(1024), nullable=False, default="")
-
-    assistant = relationship("Assistant", back_populates="assistant_settings", uselist=False)
-
-
-class MemorySettings(Base, DbBaseModel):
-    __tablename__ = "memory_settings"
-
-    enable_user_memory = Column(Boolean, nullable=False, default=False)
-    enable_conversation_memory = Column(Boolean, nullable=False, default=False)
-    embedding_model_id = Column(UUID(as_uuid=True), ForeignKey("llms.id"), nullable=True)
-    user_top_k = Column(Integer, nullable=False, default=5)
-    conversation_top_k = Column(Integer, nullable=False, default=5)
-
-    assistant = relationship("Assistant", back_populates="memory_settings", uselist=False)
-
-
 class Assistant(Base, DbBaseModel):
     __tablename__ = "assistants"
 
@@ -151,14 +96,8 @@ class Assistant(Base, DbBaseModel):
 
     knowledge_base_ids = Column(ARRAY(UUID(as_uuid=True)), nullable=False)
 
-    llm_settings_id = Column(UUID(as_uuid=True), ForeignKey("llm_settings.id"), nullable=False)
-    retrieval_settings_id = Column(UUID(as_uuid=True), ForeignKey("retrieval_settings.id"), nullable=False)
-    memory_settings_id = Column(UUID(as_uuid=True), ForeignKey("memory_settings.id"), nullable=False)
-    prompt_settings_id = Column(UUID(as_uuid=True), ForeignKey("prompt_settings.id"), nullable=False)
-    assistant_settings_id = Column(UUID(as_uuid=True), ForeignKey("assistant_settings.id"), nullable=False)
-
-    llm_settings = relationship("LLMSettings", back_populates="assistant")
-    retrieval_settings = relationship("RetrievalSettings", back_populates="assistant")
-    memory_settings = relationship("MemorySettings", back_populates="assistant")
-    prompt_settings = relationship("PromptSettings", back_populates="assistant")
-    assistant_settings = relationship("AssistantSettings", back_populates="assistant")
+    llm_settings_id = Column(JSON, nullable=False)
+    retrieval_settings_id = Column(JSON, nullable=False)
+    memory_settings_id = Column(JSON, nullable=False)
+    prompt_settings_id = Column(JSON, nullable=False)
+    assistant_settings_id = Column(JSON, nullable=False)
