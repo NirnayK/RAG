@@ -1,27 +1,28 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends
 from loguru import logger
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from constants.common import SAVE, UPDATE
-from core.db import get_db
+from core.db import get_db_session
 from core.security import get_current_user_id
 from models import User
 from schemas.user import UserCreate, UserOut, UserUpdate
+from services.common import CommonService
 from services.response import BaseResponse
 from validators.user import UserValidator
 
 router = APIRouter(prefix="/user", tags=["user"])
 resp = BaseResponse(model=UserOut)
+db_service = CommonService(model=User)
 
 
 @router.post("/create")
-async def create_user(user: UserCreate, request: Request, db: AsyncSession = Depends(get_db)):
+async def create_user(user: UserCreate, session: AsyncSession = Depends(get_db_session)):
     """
     Create a new user.
     """
     # Validate user data
-    validator = UserValidator(db=db, data=user)
+    validator = UserValidator(session=session, data=user)
 
     if not await validator.is_valid(SAVE):
         logger.error("Validation failed for create user: {}", validator.errors)
@@ -36,15 +37,13 @@ async def create_user(user: UserCreate, request: Request, db: AsyncSession = Dep
 @router.get("/me")
 async def get_user(
     user_id: str = Depends(get_current_user_id),
-    db: AsyncSession = Depends(get_db),
+    session: AsyncSession = Depends(get_db_session),
 ):
     """
     Get user details by user ID.
     """
     logger.info("GET /user/me - user_id: {}", user_id)
-    query = select(User).filter(User.id == user_id, User.deleted_at.is_(None))
-    result = await db.execute(query)
-    user = result.scalar_one_or_none()
+    user = await db_service.get_by_id(session=session, id=user_id)
 
     if not user:
         logger.warning("User not found - id: {}", user_id)
@@ -58,22 +57,20 @@ async def get_user(
 async def update_user(
     user: UserUpdate,
     user_id: str = Depends(get_current_user_id),
-    db: AsyncSession = Depends(get_db),
+    session: AsyncSession = Depends(get_db_session),
 ):
     """
     Update user details.
     """
     logger.info("PUT /user/me - user_id: {}, payload: {}", user_id, user.model_dump())
-    query = select(User).filter(User.id == user_id, User.deleted_at.is_(None))
-    result = await db.execute(query)
-    db_user = result.scalar_one_or_none()
+    db_user = await db_service.get_by_id(session=session, id=user_id)
 
     if not db_user:
         logger.warning("User not found for update - id: {}", user_id)
         return resp.not_found(message="User not found")
 
     # Validate and update user
-    validator = UserValidator(db=db, data=user)
+    validator = UserValidator(session=session, data=user)
 
     if not await validator.is_valid(UPDATE):
         logger.error("Validation failed for update user: {}", validator.errors)
@@ -88,20 +85,18 @@ async def update_user(
 @router.delete("/me")
 async def delete_user(
     user_id: str = Depends(get_current_user_id),
-    db: AsyncSession = Depends(get_db),
+    session: AsyncSession = Depends(get_db_session),
 ):
     """
     Delete a user by user ID (soft delete).
     """
     logger.info("DELETE /user/me - user_id: {}", user_id)
-    query = select(User).filter(User.id == user_id, User.deleted_at.is_(None))
-    result = await db.execute(query)
-    user = result.scalar_one_or_none()
+    user = await db_service.get_by_id(session=session, id=user_id)
 
     if not user:
         logger.warning("User not found for delete - id: {}", user_id)
         return resp.not_found(message="User not found")
 
-    await user.mark_deleted(db)
+    await db_service.mark_delete_by_id(session=session, id=user_id)
     logger.info("User deleted successfully - id: {}", user_id)
     return resp.ok(message="User deleted successfully")

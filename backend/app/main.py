@@ -2,6 +2,7 @@ import sys
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from loguru import logger
 
 # OpenTelemetry setup
@@ -19,7 +20,7 @@ from api.routes.kb import router as kb_router
 from api.routes.llm import router as llm_router
 from api.routes.metrics import router as metrics_router
 from api.routes.user import router as user_router
-from app.api.routes.health import router as health_router
+from app.api.routes.probe import router as probe_router
 from core.config import settings
 
 
@@ -51,6 +52,9 @@ trace.set_tracer_provider(provider)
 
 app = FastAPI()
 
+# enable gzip compression for responses >= 1000 bytes
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+
 # instrument FastAPI
 FastAPIInstrumentor.instrument_app(app)
 
@@ -69,4 +73,4 @@ app.include_router(chunk_router, prefix="/chunk", tags=["chunk"])
 app.include_router(llm_router, prefix="/llm", tags=["llm"])
 app.include_router(asst_router, prefix="/assistant", tags=["assistant"])
 app.include_router(metrics_router)
-app.include_router(health_router)
+app.include_router(probe_router)

@@ -17,9 +17,9 @@ class BaseValidator(Generic[T], ABC):
     class Config:
         model_class = None  # Set by subclasses
 
-    def __init__(self, db: AsyncSession, data: T, user_id: str = ""):
+    def __init__(self, session: AsyncSession, data: T, user_id: str = ""):
         self.data = data
-        self.db = db
+        self.session = session
         self.user_id = user_id
         self.errors = []  # Store validation errors as a list of strings
 
@@ -41,7 +41,7 @@ class BaseValidator(Generic[T], ABC):
             return self.validate
 
     async def validate_queries(self, db_queries: List, apis: List[Callable] = None) -> List:
-        tasks = [self.db.execute(query) for query in db_queries]
+        tasks = [self.session.execute(query) for query in db_queries]
         tasks += [api() for api in apis]
         results = await asyncio.gather(*tasks)
         return results
@@ -147,8 +147,8 @@ class BaseValidator(Generic[T], ABC):
 
         data = await self.save_serialize()
         db_obj = self.Config.model_class(**data)
-        self.db.add(db_obj)
-        await self.db.commit()
+        self.session.add(db_obj)
+        await self.session.commit()
         return db_obj
 
     async def update_serialize(self, db_obj: Any) -> Dict:
@@ -189,5 +189,5 @@ class BaseValidator(Generic[T], ABC):
                 if field in data:
                     setattr(db_obj, field, data[field])
 
-        await self.db.commit()
+        await self.session.commit()
         return db_obj

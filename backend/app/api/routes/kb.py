@@ -6,14 +6,14 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Local Application Imports
-from core.db import get_db
+from core.db import get_db_session
 from schemas.kb import KbCreate, KbOut, KbUpdate
 
 router = APIRouter(prefix="/kb", tags=["kb"])
 
 
 @router.post("/create", response_model=KbOut)
-async def create_kb(kb: KbCreate, db: AsyncSession = Depends(get_db)):
+async def create_kb(kb: KbCreate, session: AsyncSession = Depends(get_db_session)):
     """
     Create a new knowledge base.
     """
@@ -22,7 +22,7 @@ async def create_kb(kb: KbCreate, db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/{kb_id}", response_model=KbOut)
-async def get_kb(kb_id: str, db: AsyncSession = Depends(get_db)):
+async def get_kb(kb_id: str, session: AsyncSession = Depends(get_db_session)):
     """
     Get knowledge base details by knowledge base ID.
     """
@@ -31,7 +31,7 @@ async def get_kb(kb_id: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.put("/{kb_id}", response_model=KbOut)
-async def update_kb(kb_id: str, kb: KbUpdate, db: AsyncSession = Depends(get_db)):
+async def update_kb(kb_id: str, kb: KbUpdate, session: AsyncSession = Depends(get_db_session)):
     """
     Update knowledge base details.
     """
@@ -40,7 +40,7 @@ async def update_kb(kb_id: str, kb: KbUpdate, db: AsyncSession = Depends(get_db)
 
 
 @router.delete("/{kb_id}")
-async def delete_kb(kb_id: str, db: AsyncSession = Depends(get_db)):
+async def delete_kb(kb_id: str, session: AsyncSession = Depends(get_db_session)):
     """
     Delete a knowledge base by knowledge base ID.
     """
@@ -49,7 +49,7 @@ async def delete_kb(kb_id: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/list", response_model=List[KbOut])
-async def list_kbs(db: AsyncSession = Depends(get_db)):
+async def list_kbs(session: AsyncSession = Depends(get_db_session)):
     """
     List all knowledge bases.
     """
@@ -58,7 +58,7 @@ async def list_kbs(db: AsyncSession = Depends(get_db)):
 
 
 @router.put("/action/{kb_id}", response_model=KbOut)
-async def action_kb(kb_id: str, action: str, db: AsyncSession = Depends(get_db)):
+async def action_kb(kb_id: str, action: str, session: AsyncSession = Depends(get_db_session)):
     """
     Perform an action on a knowledge base.
     """
@@ -68,7 +68,7 @@ async def action_kb(kb_id: str, action: str, db: AsyncSession = Depends(get_db))
 
 
 @router.get("/search", response_model=List[KbOut])
-async def search_kbs(query: str, db: AsyncSession = Depends(get_db)):
+async def search_kbs(query: str, session: AsyncSession = Depends(get_db_session)):
     """
     Search knowledge bases by query.
     """

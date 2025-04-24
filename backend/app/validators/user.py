@@ -24,7 +24,7 @@ class UserValidator(BaseValidator[Union[UserCreate, UserUpdate]]):
         """
         errors = defaultdict(list)
         query = self.validate_is_unique(User, "email", self.data.email)
-        result = await self.db.execute(query)
+        result = await self.session.execute(query)
 
         if not result:
             errors["email"].append("Email already exists")

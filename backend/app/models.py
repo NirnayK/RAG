@@ -31,11 +31,6 @@ class DbBaseModel:
     )
     deleted_at = Column(DateTime, nullable=True)
 
-    async def mark_deleted(self, db_session: AsyncSession):
-        self.deleted_at = datetime.now(timezone.utc)
-        db_session.add(self)
-        await db_session.commit()
-
 
 class User(Base, DbBaseModel):
     __tablename__ = "users"
@@ -85,6 +80,7 @@ class Document(Base, DbBaseModel):
     status = Column(String(32), nullable=False, default="pending")
     progress = Column(SmallInteger, nullable=False, default=0)
     location = Column(String(4096), nullable=False)
+    size = Column(Integer, nullable=False)
 
     chunk_count = Column(Integer, default=0)
     parser = Column(String(255), nullable=False, default="default")

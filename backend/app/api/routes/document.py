@@ -6,14 +6,14 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Local Application Imports
-from core.db import get_db
+from core.db import get_db_session
 from schemas.document import DocumentOut, DocumentUpdate
 
 router = APIRouter(prefix="/kb/{kb_id}/document", tags=["document"])
 
 
 @router.post("/upload", response_model=DocumentOut)
-async def create_document(db: AsyncSession = Depends(get_db)):
+async def create_document(session: AsyncSession = Depends(get_db_session)):
     """
     Create a new document.
     """
@@ -22,7 +22,7 @@ async def create_document(db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/{document_id}", response_model=DocumentOut)
-async def get_document(document_id: str, db: AsyncSession = Depends(get_db)):
+async def get_document(document_id: str, session: AsyncSession = Depends(get_db_session)):
     """
     Get document details by document ID.
     """
@@ -31,7 +31,9 @@ async def get_document(document_id: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.put("/{document_id}", response_model=DocumentOut)
-async def update_document(document_id: str, document: DocumentUpdate, db: AsyncSession = Depends(get_db)):
+async def update_document(
+    document_id: str, document: DocumentUpdate, session: AsyncSession = Depends(get_db_session)
+):
     """
     Update document details.
     """
@@ -40,7 +42,7 @@ async def update_document(document_id: str, document: DocumentUpdate, db: AsyncS
 
 
 @router.delete("/{document_id}")
-async def delete_document(document_id: str, db: AsyncSession = Depends(get_db)):
+async def delete_document(document_id: str, session: AsyncSession = Depends(get_db_session)):
     """
     Delete a document by document ID.
     """
@@ -49,7 +51,7 @@ async def delete_document(document_id: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.put("/action/{document_id}", response_model=DocumentOut)
-async def action_document(document_id: str, action: str, db: AsyncSession = Depends(get_db)):
+async def action_document(document_id: str, action: str, session: AsyncSession = Depends(get_db_session)):
     """
     Perform an action on a document.
     """
@@ -58,7 +60,7 @@ async def action_document(document_id: str, action: str, db: AsyncSession = Depe
 
 
 @router.get("/list", response_model=List[DocumentOut])
-async def list_documents(db: AsyncSession = Depends(get_db)):
+async def list_documents(session: AsyncSession = Depends(get_db_session)):
     """
     List all documents.
     """
