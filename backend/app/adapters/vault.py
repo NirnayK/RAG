@@ -1,3 +1,6 @@
+import asyncio
+from typing import Optional
+
 import hvac
 from loguru import logger
 
@@ -13,33 +16,32 @@ class VaultClient:
         if not self.client.is_authenticated():
             raise RuntimeError("Vault authentication failed")
 
-    def write_secret(self, user_id: str, llm_id: str, api_key: str):
+    async def write_secret(self, user_id: str, llm_id: str, user_api_key: str):
         """
         Write to KV v2 at {mount}/{path}
         """
         path = f"{user_id}/{llm_id}"
-        secret = dict(key=api_key)
+        secret = dict(api_key=user_api_key)
         try:
-            self.client.secrets.kv.v2.create_or_update_secret(
-                path=path, secret=secret, mount_path=settings.VAULT_KV_MOUNT_PATH
+            await asyncio.to_thread(
+                self.client.secrets.kv.v2.create_or_update_secret,
+                path=path,
+                secret=secret,
+                mount_path=settings.VAULT_KV_MOUNT_PATH,
             )
         except Exception as e:
             logger.error(f"Failed to write secret to Vault: {e}")
             raise RuntimeError("Failed to write secret to Vault")
 
-    def read_secret(self, user_id: str, llm_id: str) -> dict:
+    async def read_secret(self, user_id: str, llm_id: str) -> Optional[str]:
         """
         Read from KV v2 at {mount}/{path}
         """
-        path = f"{settings.VAULT_KV_MOUNT_PATH}/{user_id}/{llm_id}"
+        path = f"{user_id}/{llm_id}"
         try:
-            result = self.client.secrets.kv.v2.read_secret_version(
-                path=path, mount_path=settings.VAULT_KV_MOUNT_PATH
+            result = await asyncio.to_thread(
+                self.client.secrets.kv.v2.read_secret_version, path=path, mount_path=settings.VAULT_KV_MOUNT_PATH
             )
-            return result["data"]["data"]["key"]
-        except hvac.InvalidRequest as e:
-            logger.error(f"Failed to read secret from Vault: {e}")
-            raise RuntimeError("Failed to read secret from Vault")
+            return result["data"]["data"]["api_key"]
         except Exception as e:
             logger.error(f"Failed to read secret from Vault: {e}")
-            raise RuntimeError("Failed to read secret from Vault")

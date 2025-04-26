@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.security import get_current_user_id
 from core.db import get_db_session
 from schemas.llm import LLMBase
 
@@ -8,7 +9,9 @@ router = APIRouter(prefix="/llm", tags=["llm"])
 
 
 @router.post("/create")
-async def create_llm(llm: LLMBase, session: AsyncSession = Depends(get_db_session)):
+async def create_llm(
+    llm: LLMBase, user_id: str = Depends(get_current_user_id), session: AsyncSession = Depends(get_db_session)
+):
     """
     Create a new LLM.
     """
@@ -17,7 +20,9 @@ async def create_llm(llm: LLMBase, session: AsyncSession = Depends(get_db_sessio
 
 
 @router.get("/{llm_id}")
-async def get_llm(llm_id: str, session: AsyncSession = Depends(get_db_session)):
+async def get_llm(
+    llm_id: str, user_id: str = Depends(get_current_user_id), session: AsyncSession = Depends(get_db_session)
+):
     """
     Get LLM details by LLM ID.
     """
@@ -26,7 +31,12 @@ async def get_llm(llm_id: str, session: AsyncSession = Depends(get_db_session)):
 
 
 @router.put("/{llm_id}")
-async def update_llm(llm_id: str, llm: LLMBase, session: AsyncSession = Depends(get_db_session)):
+async def update_llm(
+    llm_id: str,
+    llm: LLMBase,
+    user_id: str = Depends(get_current_user_id),
+    session: AsyncSession = Depends(get_db_session),
+):
     """
     Update LLM details.
     """
@@ -35,7 +45,9 @@ async def update_llm(llm_id: str, llm: LLMBase, session: AsyncSession = Depends(
 
 
 @router.delete("/{llm_id}")
-async def delete_llm(llm_id: str, session: AsyncSession = Depends(get_db_session)):
+async def delete_llm(
+    llm_id: str, user_id: str = Depends(get_current_user_id), session: AsyncSession = Depends(get_db_session)
+):
     """
     Delete an LLM by LLM ID.
     """
@@ -44,7 +56,7 @@ async def delete_llm(llm_id: str, session: AsyncSession = Depends(get_db_session
 
 
 @router.get("/list")
-async def list_llms(session: AsyncSession = Depends(get_db_session)):
+async def list_llms(user_id: str = Depends(get_current_user_id), session: AsyncSession = Depends(get_db_session)):
     """
     List all LLMs.
     """
